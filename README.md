@@ -1,86 +1,177 @@
 
-# Module 2 Final Project Specifications
+# Project - Hypothesis Testing
+
+The original text can be found on my [blog]().
+
 
 ## Introduction
 
-In this lesson, we'll review all the guidelines and specifications for the final project for Module 2. 
 
-## Objectives
+When we are talking about hypothesis testing, what we are merely trying to do is reframing a qualitative question into a mathematical problem. For example, we might ask:
 
-* Understand all required aspects of the Final Project for Module 2
-* Understand all required deliverables
-* Understand what constitutes a successful project
+*Do discounts have a statistically significant effect on the number of products customers order? If so, at what level(s) of discount?*
 
-### Final Project Summary
+And reframe it to:
 
-Another module down--you're half way there!
+$H_0: \mu_{\text{discounts}} \leq \mu_{\text{no discounts}}$, the mean of the amount sold in orders with discounts is less or equal to the mean of the amount sold in orders without discounts.
 
-<img src='halfway-there.gif'>
+Our goal usually is to reject our formulated null hypothesis by calculating the p-value which we generally want to be **p < 0.05**   (i.e., there’s only a 5% chance that two identical distributions could have produced these results).
 
-For the culmination of Module 2, you just need to complete the final project!
 
-### The Project
+## What type of data do we have? Categorical or Numerical?
 
-For this project, you'll be working with the Northwind database--a free, open-source dataset created by Microsoft containing data from a fictional company. You probably remember the Northwind database from our section on Advanced SQL. Here's the schema for the Northwind database:
+We first want to find out what type of data we are dealing with whether it is continuous or categorical. For example, we want to find the mean height of all boys in a school year, and we could be very very accurate and measure every boy to the n-th digit after the comma. In this case, we are dealing with continuous (numerical) data. On the other hand, we have categorical data if we want to know if the girls have a significant different preference in what type of fruit (apple, bananas, plums etc) they eat.
 
-<img src='Northwind_ERD.png'>
 
-The goal of this project is to test your ability to gather information from a real-world database and use your knowledge of statistical analysis and hypothesis testing to generate analytical insights that can be of value to the company. 
+## How many samples am I comparing?
 
-## The Deliverables
+* 1 Sample i.e., comparing an actual result against a desired target
+* 2 Sample i.e., comparing a control and treatment group or an A/B test
+* More than 2 Sample i.e., comparing three different variants of a landing page
 
-The goal of your project is to query the database to get the data needed to perform a statistical analysis.  In this statistical analysis, you'll need to perform a hypothesis test (or perhaps several) to answer the following question:
+<center><img src="images/hypothesis_test_small.jpg"></center>
 
-**_Does discount amount have a statistically significant effect on the quantity of a product in an order? If so, at what level(s) of discount?_**
+### 1 Sample T-Test
 
-In addition to answering this question with a hypothesis test, you will also need to come up with **_at least 3 other hypotheses to test on your own_**.  These can by anything that you think could be imporant information for the company. 
+Compares a sample mean to a hypothetical population mean. It answers the question "What is the probability that the sample came from a distribution with the desired mean?" Use this when you are comparing against a known target (like a statistic from a paper or a target metric).
 
-For this hypothesis, be sure to specify both the **_null hypothesis_** and the **_alternative hypothesis_** for your question.  You should also specify if this is one-tail or a two-tail test. 
+**ttest_1samp** requires two inputs, a distribution of values and an expected mean:
 
-To complete this project, you will need to turn in the following 3 deliverables:
+```python
+    tstat, pval = ttest_1samp(example_distribution, expected_mean)
+    print(pval)
+```
 
-1. A **_Jupyter Notebook_** containing any code you've written for this project. 
-2. A **_Blog Post_** explaining your process, methodology, and findings.  
-3. An **_"Executive Summary" PowerPoint Presentation_** that explains the hypothesis tests you ran, your findings, and their relevance to company stakeholders.  
+### 2 Sample T-Test
+A 2 Sample T-Test compares two sets of data, which are both approximately normally distributed.The null hypothesis, in this case, is that the two distributions have the same mean. Use this when you are comparing two different numerical samples.
 
-### Jupyter Notebook Must-Haves
+**ttest_ind** requires two distributions of values:
 
-For this project, your jupyter notebook should meet the following specifications:
+```python
+    tstat, pval = ttest_ind(example_distribution1, example_distribution2)
+    print(pval)
+```
 
-**_Organization/Code Cleanliness_**
+### ANOVA
+ANOVA compares 2 or more numerical datasets without increasing the probability of a false positive. In order to use ANOVA, The samples are independent. Each sample is from a normally distributed population.The population standard deviations of the groups are all equal. This property is known as homoscedasticity.
 
-* The notebook should be well organized, easy to follow, and code is commented where appropriate.  
-<br>  
-    * Level Up: The notebook contains well-formatted, professional looking markdown cells explaining any substantial code. All functions have docstrings that act as professional-quality documentation.  
-<br>      
-* The notebook is written to technical audiences with a way to both understand your approach and reproduce your results. The target audience for this deliverable is other data scientists looking to validate your findings.  
-<br>    
-* Any SQL code written to source data should also be included.  
+**f_oneway** (scipy.stats) requires two or more groups:
 
-**_Findings_**
+```python
+    fstat, pval = f_oneway(data_group1, data_group2, data_group3, data_groupN)
+    print(pval)
+```
 
-* Your notebook should clearly show how you arrived at your results for each hypothesis test, including how you calculated your p-values.   
-<br>
-* You should also include any other statistics that you find relevant to your analysis, such as effect size. 
+**ols** (statsmodels)
+```python
+    model_name = ols('outcome_variable ~ group1 + group2 + groupN',
+                     data=your_data).fit()
+    model_name.summary()
+```
 
-### Blog Post Must-Haves
+### Tukey
+Tukey's Range Test compares more than 2 numerical datasets without increasing the probability of a false positive. Unlike ANOVA, Tukey tells us which datasets are significantly different. Many statisticians use Tukey instead of Anova. Note: pairwise_tukeyhsd is from StatsModels, not SciPy!
 
-Your blog post should include everything from how you identified what tables contained the information you need, to how you retrieved it using SQL (and any challenges you ran into while doing so), as well as your methodology and results for your hypothesis tests. 
+**pairwise_tukeyhsd#** requires three arguments:
+* A vector of all data (concatenated using np.concatenate)
+* A vector of labels for the data
+* A level of significance (usually 0.05)
 
-**_NOTE:_**  This blog post is your way of showcasing the work you've done on this project--chances are it will soon be read by a recruiter or hiring manager! Take the time to make sure that you craft your story well, and clearly explain your process and findings in a way that clearly shows both your technical expertise **_and_** your ability to communicate your results!
+```python
+    v = np.concatenate([a, b, c])
+    labels = ['a'] * len(a) + ['b'] * len(b) + ['c'] * len(c)
+    tukey_results = pairwise_tukeyhsd(v, labels, 0.05)
+```
 
-### Executive Summary Must-Haves
+### Binomial Test
+Compares an observed proportion to a theoretical ideal.
+Examples:
+* Comparing the actual percent of emails that were opened to the quarterly goals
+* Comparing the actual percentage of respondents who gave a certain survey response to the expected survey response
 
-Your presentation should:
+**binom_test** requires three arguments:
+* The number of successes (the numerator of your proportion)
+* n - the number of trials (the denominator of your proportion)
+* p - the proportion you are comparing to
 
-* Contain between 5-10 professional quality slides detailing:
-<br>  
-    * A high-level overview of your methodology  
-    <br>  
-    * The results of your hypothesis tests  
-    <br>  
-    * Any real-world recommendations you would like to make based on your findings (ask yourself--why should the executive team care about what you found? How can your findings help the company?)  
-    <br>  
-* Take no more than 5 minutes to present  
-<br>  
-* Avoid technical jargon and explain results in a clear, actionable way for non-technical audiences.  
+```python
+    pval = binomtest(numerator, n=denominator, p=proportion)
+    print(pval)
+```
+
+### Chi Squared Test
+If we have two or more categorical datasets that we want to compare, we should use a Chi Square test. It is useful in situations like:
+* An A/B test where half of users were shown a green submit button and the other half were shown a purple submit button. Was one group more likely to click the submit button?
+* Men and women were both given a survey asking "Which of the following three products is your favorite?" Did the men and women have significantly different preferences?
+
+**chi2_contingency** requires a contingency table of all results:
+
+```python
+    chi2, pval, dof, expected = chi2_contenigency([cat1yes, cat1no],
+                                                  [cat2yes, cat2no])
+    print(pval)
+```
+
+
+## Use Case
+
+If we are going back to our example for a null hypothesis from above we can use either the 2 Sample T-Test (ttest_ind) or ANOVA. All approaches depend on how we are going to prepare the data.
+
+Let take a practical example and work through it on the Northwind database Microsoft provides.
+
+1\. Join 'OrderDetail', 'Product' and 'Category' and assign meaningful names to the features:
+
+~~~~sql
+    SELECT OrderDetail.Id orderdetail_id,
+           OrderDetail.ProductId orderdetail_prodid,
+           OrderDetail.Quantity orderdetail_quantity,
+           OrderDetail.UnitPrice orderdetail_unitprice,
+           OrderDetail.Discount orderdetail_discount,
+           Product.Id product_id,
+           Category.Id category_id,
+           Category.CategoryName category_name
+    FROM Category
+    JOIN Product ON Category.Id = Product.CategoryId
+    JOIN OrderDetail ON Product.Id = OrderDetail.ProductId;
+~~~~
+
+```python
+    data = pd.read_sql_query(your_sql_command, engine)
+```
+$\tiny \ast \text{ The SQL statement should be inside of ```}$
+
+2\. Extract all 'Unit price' and split them into two lists for simplicity:
+
+```python
+    d_df = Q2_df['orderdetail_unitprice'].where(Q2_df['discount_bool'] == 1)
+    nd_df = Q2_df['orderdetail_unitprice'].where(Q2_df['discount_bool'] == 0)
+    discount = d_df.tolist()
+    no_discount = nd_df.tolist()
+```
+
+3\. Run the 2 Sample T-Test (Note: the ttest_ind creates a readable statement:
+
+```python
+    stats.ttest_ind(discount, no_discount, equal_var = False)
+    # Ttest_indResult(statistic=-2.9756718793666415, pvalue=0.0034331287209264576)
+```
+
+4\. As a final step we want to calculate the effect size using Cohen's $d$. Cohen's $d$ is typically used to represent the magnitude of differences between two (or more) groups on a given variable, with larger values representing a greater differentiation between the two groups on that variable.
+
+```python
+    cohens_d = (mean(x) - mean(y)) / (sqrt((stdev(x)**2 + stdev(y)**2) / 2))
+    print("Cohen's D: {}".format(cohens_d))
+    # Cohen's D:  0.4564472299543739
+```
+
+5\. Conclusion, because our p-value (0.0034) is not significant, we reject the null hypothesis in support of the alternative.
+
+
+## Further Reading
+Hypothesis Testing is a big topic, and this was just a quick overview of how someone can approach a question using Python. Here is a short list of resources that I fund helpful:
+
+* [Z-statistics vs. T-statistics](https://www.youtube.com/watch?v=5ABpqVSx33I&feature=youtu.be) - Khan Academy
+* [A/B Testing: The Definitive Guide to Improving Your Product](https://www.dataquest.io/blog/a-b-testing-the-definitive-guide-to-improving-your-product/) - Dataquest
+* [Understanding t-Tests](http://blog.minitab.com/blog/adventures-in-statistics-2/understanding-t-tests-1-sample-2-sample-and-paired-t-tests) - The Minitab Blog
+* [A Gentle Introduction to Effect Size Measures in Python](https://machinelearningmastery.com/effect-size-measures-in-python/) - Machine Learning Mastery
+* [Robust effect sizes for 2 independent groups](https://garstats.wordpress.com/2016/05/02/robust-effect-sizes-for-2-independent-groups/) - basic statistics
