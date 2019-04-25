@@ -1,7 +1,7 @@
 
 # Project - Hypothesis Testing
 
-The original text can be found on my [blog]().
+The original text can be found on my [blog](https://stephanosterburg.github.io/stephanosterburg.github.io/testing_hypothesis/).
 
 
 ## Introduction
